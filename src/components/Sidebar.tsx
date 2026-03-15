@@ -7,7 +7,8 @@ import {
   MapPin,
   Grid3x3,
   Menu,
-  X
+  X,
+  Star
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -30,6 +31,11 @@ export default function Sidebar() {
       path: '/categories',
       label: 'Categories',
       icon: Grid3x3
+    },
+    {
+      path: '/reviews',
+      label: 'Reviews',
+      icon: Star
     }
   ];
 

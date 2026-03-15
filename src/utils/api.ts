@@ -300,29 +300,137 @@ export const api = {
     return response.json();
   },
 
-  // Enquiries endpoints
-  getEnquiries: async () => {
+  // Reviews endpoints
+
+  // Submit review (Public user)
+submitReview: async (reviewData: {
+  name: string;
+  email: string;
+  rating: number;
+  review: string;
+}) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/reviews`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...reviewData,
+        isApproved: false
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || err.message || "Failed to submit review");
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error("Submit Review Error:", error);
+    throw error;
+  }
+},
+  getReviews: async () => {
     const token = localStorage.getItem("adminToken");
-    const response = await fetch(`${API_BASE_URL}/enquiry`, {
-      headers: { Authorization: `Bearer ${token}` },
+    try {
+      const response = await fetch(`${API_BASE_URL}/reviews`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || err.message || "Failed to fetch reviews");
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Reviews API Error:', error);
+      // Return empty array as fallback for any network issues
+      return [];
+    }
+  },
+
+  updateReviewStatus: async (id: string, statusData: { isApproved: boolean }) => {
+    const token = localStorage.getItem("adminToken");
+    const response = await fetch(`${API_BASE_URL}/reviews/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(statusData),
     });
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
-      throw new Error(err.error || err.message || "Failed to fetch enquiries");
+      throw new Error(err.error || err.message || "Failed to update review");
     }
     return response.json();
   },
 
-  deleteEnquiry: async (id: string) => {
+  deleteReview: async (id: string) => {
     const token = localStorage.getItem("adminToken");
-    const response = await fetch(`${API_BASE_URL}/enquiry/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/reviews/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
-      throw new Error(err.error || err.message || "Failed to delete enquiry");
+      throw new Error(err.error || err.message || "Failed to delete review");
     }
     return response.json();
   },
+};
+
+// ================= REVIEWS =================
+
+// Get all reviews (Admin)
+export const getReviews = async () => {
+  const response = await fetch(`${API_BASE_URL}/reviews`);
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || err.message || "Failed to fetch reviews");
+  }
+
+  return response.json();
+};
+
+
+// Approve or Reject review
+export const updateReviewStatus = async (
+  id: string,
+  status: "APPROVED" | "REJECTED"
+) => {
+
+  const response = await fetch(`${API_BASE_URL}/reviews/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ status }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update review status");
+  }
+
+  return response.json();
+};
+
+
+// Delete review
+export const deleteReview = async (id: string) => {
+
+  const response = await fetch(`${API_BASE_URL}/reviews/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete review");
+  }
 };

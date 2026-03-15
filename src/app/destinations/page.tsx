@@ -539,6 +539,44 @@ export default function DestinationsPage() {
   };
 
   // =================================
+  // Image Upload Handlers
+  // =================================
+
+  const handleMainImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const base64 = event.target?.result as string;
+        const result = await api.uploadImage(base64);
+        setFormData({ ...formData, image: result.url });
+      };
+      reader.readAsDataURL(file);
+    } catch (error: any) {
+      alert(error.message || 'Failed to upload image');
+    }
+  };
+
+  const handleDayImageUpload = async (dayIndex: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const base64 = event.target?.result as string;
+        const result = await api.uploadImage(base64);
+        updateDay(dayIndex, 'image', result.url);
+      };
+      reader.readAsDataURL(file);
+    } catch (error: any) {
+      alert(error.message || 'Failed to upload day image');
+    }
+  };
+
+  // =================================
   // UI (UNCHANGED)
   // =================================
 
@@ -719,8 +757,16 @@ export default function DestinationsPage() {
                     </div>
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Image URL</label>
-                    <input type="text" className="form-input" value={formData.image ?? ''} onChange={e => setFormData({ ...formData, image: e.target.value })} />
+                    <label className="form-label">Destination Image</label>
+                    <div className="flex gap-2">
+                      <input type="file" accept="image/*" onChange={handleMainImageUpload} className="form-input" />
+                      {formData.image && (
+                        <button type="button" onClick={() => setFormData({ ...formData, image: '' })} className="btn btn-danger">Clear</button>
+                      )}
+                    </div>
+                    {formData.image && (
+                      <img src={formData.image} alt="Preview" className="mt-2 h-20 w-20 object-cover rounded" />
+                    )}
                   </div>
                   <div className="form-group">
                     <label className="form-label">Rating</label>
@@ -770,7 +816,18 @@ export default function DestinationsPage() {
                       </button>
                     </div>
                     <input type="text" placeholder="Day Title" className="form-input mb-2" value={day.title ?? ''} onChange={e => updateDay(i, 'title', e.target.value)} />
-                    <input type="text" placeholder="Day Image URL" className="form-input mb-2" value={day.image ?? ''} onChange={e => updateDay(i, 'image', e.target.value)} />
+                    <div className="mb-2">
+                      <label className="form-label text-sm">Day Image</label>
+                      <div className="flex gap-2">
+                        <input type="file" accept="image/*" onChange={(e) => handleDayImageUpload(i, e)} className="form-input text-sm" />
+                        {day.image && (
+                          <button type="button" onClick={() => updateDay(i, 'image', '')} className="btn btn-danger text-sm">Clear</button>
+                        )}
+                      </div>
+                      {day.image && (
+                        <img src={day.image} alt="Day preview" className="mt-1 h-16 w-16 object-cover rounded" />
+                      )}
+                    </div>
                     <textarea placeholder="Description" className="form-textarea mb-2" rows={2} value={day.description ?? ''} onChange={e => updateDay(i, 'description', e.target.value)} />
 
                     <div className="mt-2">
