@@ -26,12 +26,12 @@ export const api = {
       },
       body: JSON.stringify({ email, password }),
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Login failed');
     }
-    
+
     return response.json();
   },
 
@@ -44,7 +44,7 @@ export const api = {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) {
         const err = await response.json().catch(() => ({}));
         throw new Error(err.error || err.message || "Failed to fetch categories");
@@ -55,6 +55,22 @@ export const api = {
       // Return empty array as fallback for any network issues
       return [];
     }
+  },
+
+  uploadImage: async (file: File) => {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      throw new Error("Image upload failed");
+    }
+
+    return res.json();
   },
 
   createCategory: async (categoryData: any) => {
@@ -71,20 +87,20 @@ export const api = {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.error || err.message || "Failed to create category");
     }
-    
+
     // Dispatch event to notify frontend
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('adminAction', {
-        detail: { 
-          type: 'category', 
-          action: 'added', 
+        detail: {
+          type: 'category',
+          action: 'added',
           itemName: categoryData.name || categoryData.title || 'New Category',
           details: `Category "${categoryData.name || categoryData.title || 'New Category'}" was added successfully`
         }
       }));
       console.log('📢 Admin event dispatched: category added');
     }
-    
+
     return response.json();
   },
 
@@ -102,20 +118,20 @@ export const api = {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.error || err.message || "Failed to update category");
     }
-    
+
     // Dispatch event to notify frontend
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('adminAction', {
-        detail: { 
-          type: 'category', 
-          action: 'updated', 
+        detail: {
+          type: 'category',
+          action: 'updated',
           itemName: categoryData.name || categoryData.title || 'Updated Category',
           details: `Category "${categoryData.name || categoryData.title || 'Updated Category'}" was updated successfully`
         }
       }));
       console.log('📢 Admin event dispatched: category updated');
     }
-    
+
     return response.json();
   },
 
@@ -129,20 +145,20 @@ export const api = {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.error || err.message || "Failed to delete category");
     }
-    
+
     // Dispatch event to notify frontend
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('adminAction', {
-        detail: { 
-          type: 'category', 
-          action: 'deleted', 
+        detail: {
+          type: 'category',
+          action: 'deleted',
           itemName: `Category ID: ${id}`,
           details: `Category with ID ${id} was deleted successfully`
         }
       }));
       console.log('📢 Admin event dispatched: category deleted');
     }
-    
+
     return response.json();
   },
 
@@ -155,7 +171,7 @@ export const api = {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) {
         const err = await response.json().catch(() => ({}));
         throw new Error(err.error || err.message || "Failed to fetch destinations");
@@ -176,7 +192,7 @@ export const api = {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) {
         const err = await response.json().catch(() => ({}));
         throw new Error(err.error || err.message || "Failed to fetch destinations by category");
@@ -199,7 +215,7 @@ export const api = {
           'Authorization': `Bearer ${token}`,
         },
       });
-      
+
       if (!response.ok) {
         const err = await response.json().catch(() => ({}));
         throw new Error(err.error || err.message || "Failed to fetch destination");
@@ -225,20 +241,20 @@ export const api = {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.error || err.message || "Failed to create destination");
     }
-    
+
     // Dispatch event to notify frontend
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('adminAction', {
-        detail: { 
-          type: 'destination', 
-          action: 'added', 
+        detail: {
+          type: 'destination',
+          action: 'added',
           itemName: destinationData.title || destinationData.name || 'New Destination',
           details: `Destination "${destinationData.title || destinationData.name || 'New Destination'}" was added successfully`
         }
       }));
       console.log('📢 Admin event dispatched: destination added');
     }
-    
+
     return response.json();
   },
 
@@ -256,20 +272,20 @@ export const api = {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.error || err.message || "Failed to update destination");
     }
-    
+
     // Dispatch event to notify frontend
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('adminAction', {
-        detail: { 
-          type: 'destination', 
-          action: 'updated', 
+        detail: {
+          type: 'destination',
+          action: 'updated',
           itemName: destinationData.title || destinationData.name || 'Updated Destination',
           details: `Destination "${destinationData.title || destinationData.name || 'Updated Destination'}" was updated successfully`
         }
       }));
       console.log('📢 Admin event dispatched: destination updated');
     }
-    
+
     return response.json();
   },
 
@@ -283,55 +299,55 @@ export const api = {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.error || err.message || "Failed to delete destination");
     }
-    
+
     // Dispatch event to notify frontend
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('adminAction', {
-        detail: { 
-          type: 'destination', 
-          action: 'deleted', 
+        detail: {
+          type: 'destination',
+          action: 'deleted',
           itemName: `Destination ID: ${id}`,
           details: `Destination with ID ${id} was deleted successfully`
         }
       }));
       console.log('📢 Admin event dispatched: destination deleted');
     }
-    
+
     return response.json();
   },
 
   // Reviews endpoints
 
   // Submit review (Public user)
-submitReview: async (reviewData: {
-  name: string;
-  email: string;
-  rating: number;
-  review: string;
-}) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/reviews`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...reviewData,
-        isApproved: false
-      }),
-    });
+  submitReview: async (reviewData: {
+    name: string;
+    email: string;
+    rating: number;
+    review: string;
+  }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/reviews`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...reviewData,
+          isApproved: false
+        }),
+      });
 
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.error || err.message || "Failed to submit review");
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || err.message || "Failed to submit review");
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error("Submit Review Error:", error);
+      throw error;
     }
-
-    return response.json();
-  } catch (error) {
-    console.error("Submit Review Error:", error);
-    throw error;
-  }
-},
+  },
   getReviews: async () => {
     const token = localStorage.getItem("adminToken");
     try {
@@ -342,7 +358,7 @@ submitReview: async (reviewData: {
           'Authorization': `Bearer ${token}`,
         },
       });
-      
+
       if (!response.ok) {
         const err = await response.json().catch(() => ({}));
         throw new Error(err.error || err.message || "Failed to fetch reviews");
