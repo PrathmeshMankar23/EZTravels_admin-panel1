@@ -549,9 +549,9 @@ export default function DestinationsPage() {
     try {
       const reader = new FileReader();
       reader.onload = async (event) => {
-        const base64 = event.target?.result as string;
-        const result = await api.uploadImage(base64);
-        setFormData({ ...formData, image: result.url });
+      const base64 = event.target?.result as string;
+      const imageResult = await (api as any).uploadImage(file);
+        setFormData({ ...formData, image: imageResult.url });
       };
       reader.readAsDataURL(file);
     } catch (error: any) {
@@ -567,8 +567,8 @@ export default function DestinationsPage() {
       const reader = new FileReader();
       reader.onload = async (event) => {
         const base64 = event.target?.result as string;
-        const result = await api.uploadImage(base64);
-        updateDay(dayIndex, 'image', result.url);
+      const imageResult = await (api as any).uploadImage(file);
+        updateDay(dayIndex, 'image', imageResult.url);
       };
       reader.readAsDataURL(file);
     } catch (error: any) {
