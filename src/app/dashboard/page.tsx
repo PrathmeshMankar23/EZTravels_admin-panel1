@@ -80,13 +80,6 @@ export default function DashboardPage() {
       ]);
 
       // Try to get enquiries separately, but don't fail if it doesn't work
-      let enquiries = [];
-      try {
-        enquiries = await api.getEnquiries();
-      } catch (enquiryError) {
-        console.warn('Enquiries endpoint not available:', enquiryError);
-        enquiries = [];
-      }
 
       setStats({
         totalDestinations: Array.isArray(destinations) ? destinations.length : 0,
