@@ -52,7 +52,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex-1">
-                {/* Empty div for spacing */}
+                {/* Page Title Removed */}
               </div>
               
               {/* User Actions */}

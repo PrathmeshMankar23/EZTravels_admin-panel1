@@ -66,8 +66,14 @@ function mapApiToDestination(d: any): Destination {
 
 export default function DestinationsPage() {
   const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [filteredDestinations, setFilteredDestinations] = useState<Destination[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Calculate stats
+  const totalDestinations = destinations.length;
+  const liveDestinations = destinations.filter(d => d.isActive !== false).length;
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -122,6 +128,7 @@ export default function DestinationsPage() {
       setCategories(Array.isArray(cats) ? cats : []);
       const mappedDestinations = (Array.isArray(dests) ? dests : []).map(mapApiToDestination);
       setDestinations(mappedDestinations);
+      setFilteredDestinations(mappedDestinations);
       
       // Cache data for categories page
       localStorage.setItem('cachedCategories', JSON.stringify(Array.isArray(cats) ? cats : []));
@@ -263,6 +270,7 @@ export default function DestinationsPage() {
       setCategories(demoCategories);
       const mappedDemoDestinations = demoDestinations.map(mapApiToDestination);
       setDestinations(mappedDemoDestinations);
+      setFilteredDestinations(mappedDemoDestinations);
       
       // Cache demo data for categories page
       localStorage.setItem('cachedCategories', JSON.stringify(demoCategories));
@@ -286,13 +294,36 @@ export default function DestinationsPage() {
     loadData();
   }, [router, loadData]);
 
+  // Search functionality
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredDestinations(destinations);
+    } else {
+      const filtered = destinations.filter(destination => 
+        destination.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        destination.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        destination.category?.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredDestinations(filtered);
+    }
+  }, [searchTerm, destinations]);
+
   useEffect(() => {
     if (destinations.length > 0) {
       const urlParams = new URLSearchParams(window.location.search);
       const destinationId = urlParams.get('id');
+      const shouldAdd = urlParams.get('add') === 'true';
+      
       if (destinationId) {
         const destination = destinations.find((d) => d.id === destinationId);
         if (destination) openViewModal(destination);
+      }
+      
+      // Auto-open add modal if add=true parameter is present
+      if (shouldAdd) {
+        setFormData(initialFormState);
+        setEditingDestination(null);
+        setShowAddModal(true);
       }
     }
   }, [destinations, openViewModal]);
@@ -589,29 +620,61 @@ export default function DestinationsPage() {
   return (
     <DashboardLayout>
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="page-header flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="page-title">Manage Destinations</h1>
-            <p className="page-subtitle">Create and manage your travel destinations</p>
+        {/* Stats Cards Row - Single card */}
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-8">
+          {/* Total Destinations Card - Dashboard Style - Small Width */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 max-w-sm">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Destinations</p>
+                <p className="text-2xl font-bold text-gray-900">{totalDestinations}</p>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center space-x-3">
+        </div>
+
+        {/* Search and Actions Row */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
+          {/* Search Bar - Wider, Left side */}
+          <div className="relative flex-1 lg:max-w-lg">
+            <input
+              type="text"
+              placeholder="Search destinations by title, or category..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-5 py-4 pr-12 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <svg className="absolute right-4 top-4 w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+
+          {/* Toggle and Add Buttons - Right side */}
+          <div className="flex items-center space-x-4">
             <div className="view-toggle">
               <button onClick={() => setViewMode('card')} className={`view-toggle button ${viewMode === 'card' ? 'active' : ''}`}>Card</button>
               <button onClick={() => setViewMode('table')} className={`view-toggle button ${viewMode === 'table' ? 'active' : ''}`}>Table</button>
             </div>
-            <button onClick={() => { setFormData(initialFormState); setEditingDestination(null); setShowAddModal(true); }} className="add-new-btn">
-              + Add New Destination
+            <button onClick={() => { setFormData(initialFormState); setEditingDestination(null); setShowAddModal(true); }} className="px-8 py-4 text-lg bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+              + Add Destination
             </button>
           </div>
         </div>
 
         <div className="content-area">
-          {destinations.length === 0 ? (
-            <div className="no-itineraries">No destinations found.</div>
+          {filteredDestinations.length === 0 ? (
+            <div className="no-itineraries">{searchTerm ? 'No destinations found matching your search.' : 'No destinations found.'}</div>
           ) : (
             viewMode === 'card' ? (
               <div className="card-grid">
-                {destinations.map(destination => (
+                {filteredDestinations.map(destination => (
                   <div key={destination.id} className="itinerary-card">
                     <div className="card-image-container">
                       <img src={destination.image || 'https://images.unsplash.com/photo-1469474968028-5669f8e4b82?w=500&h=300&fit=crop'} alt={destination.title} className="card-image" />
@@ -656,7 +719,7 @@ export default function DestinationsPage() {
                   </thead>
 
                   <tbody>
-                    {destinations.map(destination => (
+                    {filteredDestinations.map(destination => (
                       <tr key={destination.id} className="border-b hover:bg-gray-50">
                         <td className="px-6 py-4">
                           <div className="font-medium">{destination.title}</div>

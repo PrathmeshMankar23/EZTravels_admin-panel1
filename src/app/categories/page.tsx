@@ -25,9 +25,11 @@ interface DestinationForCategory {
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
   const [destinationsInModal, setDestinationsInModal] = useState<DestinationForCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -53,52 +55,88 @@ export default function CategoriesPage() {
         ]);
         cats = Array.isArray(catsRes) ? catsRes : [];
         dests = Array.isArray(destsRes) ? destsRes : [];
-        console.log('✅ API Raw Categories:', cats);
-        console.log('✅ API Raw Destinations:', dests);
-      } catch (err) {
-        console.error('❌ API Failed:', err);
+      } catch (e) {
         apiCallFailed = true;
+        console.error('❌ API calls failed, using demo data');
+        // Use demo data when API fails
+        cats = [
+          { id: 'cat1', name: 'Beaches', isActive: true },
+          { id: 'cat2', name: 'Mountains', isActive: true },
+          { id: 'cat3', name: 'Cities', isActive: true },
+          { id: 'cat4', name: 'Adventure', isActive: true },
+          { id: 'cat5', name: 'Wildlife', isActive: true }
+        ];
+        dests = [
+          {
+            id: 'dest1',
+            title: 'Sunny Beach Resort',
+            categoryId: 'cat1',
+            isActive: true
+          },
+          {
+            id: 'dest2',
+            title: 'Mountain Peak Trek',
+            categoryId: 'cat2',
+            isActive: true
+          },
+          {
+            id: 'dest3',
+            title: 'City Explorer Package',
+            categoryId: 'cat3',
+            isActive: true
+          },
+          {
+            id: 'dest4',
+            title: 'Adventure Safari',
+            categoryId: 'cat4',
+            isActive: true
+          },
+          {
+            id: 'dest5',
+            title: 'Wildlife Sanctuary',
+            categoryId: 'cat5',
+            isActive: true
+          }
+        ];
       }
 
-      // 2. Fallback to cache if API failed
-      if (apiCallFailed || (cats.length === 0 && dests.length === 0)) {
-        const cachedCats = localStorage.getItem('cachedCategories');
-        const cachedDests = localStorage.getItem('cachedDestinations');
-        if (cachedCats) cats = JSON.parse(cachedCats);
-        if (cachedDests) dests = JSON.parse(cachedDests);
-      }
-
-      // 3. Process Counts with Strict Type Normalization
-      const processedCategories = cats.map(category => {
-        // Filter destinations belonging to this category
-        const matchingDestinations = dests.filter(dest => {
-          if (!dest.categoryId || !category.id) return false;
-          
-          // Normalize IDs: convert to string, trim whitespace, and lowercase
-          const dId = String(dest.categoryId).trim().toLowerCase();
-          const cId = String(category.id).trim().toLowerCase();
-          
-          return dId === cId;
-        });
-
-        console.log(`Matching: Category "${category.name}" [${category.id}] found ${matchingDestinations.length} destinations.`);
-
+      // 2. Process and set data
+      // Calculate destination counts dynamically
+      const categoriesWithCounts = cats.map((category: Category) => {
+        const destinationCount = dests.filter((dest: any) => 
+          String(dest.categoryId).trim().toLowerCase() === String(category.id).trim().toLowerCase()
+        ).length;
         return {
           ...category,
-          _count: {
-            destinations: matchingDestinations.length
-          }
+          _count: { destinations: destinationCount }
         };
       });
+      
+      setCategories(categoriesWithCounts);
+      setFilteredCategories(categoriesWithCounts);
+      setApiError(apiCallFailed ? 'API unavailable - showing demo data' : '');
 
-      setCategories(processedCategories);
-      setApiError(apiCallFailed ? 'Connection error. Showing cached data.' : '');
-    } catch (e: any) {
-      setApiError('Critical error: ' + e.message);
+    } catch (err: any) {
+      console.error('❌ Critical error in loadCategories:', err);
+      setApiError('Failed to load categories');
+      setCategories([]);
+      setFilteredCategories([]);
     } finally {
       setIsLoading(false);
     }
   }, []);
+
+  // Search functionality
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredCategories(categories);
+    } else {
+      const filtered = categories.filter(category => 
+        category.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredCategories(filtered);
+    }
+  }, [searchTerm, categories]);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -161,18 +199,53 @@ export default function CategoriesPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Categories</h1>
-          <p className="text-gray-500">Manage your travel destination types</p>
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {/* Stats Cards Row - Single card */}
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-8">
+          {/* Total Categories Card - Dashboard Style - Small Width */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 max-w-sm">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  </svg>
+                </div>
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Categories</p>
+                <p className="text-2xl font-bold text-gray-900">{categories.length}</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <button 
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-sm flex items-center gap-2" 
-          onClick={() => setShowAddModal(true)}
-        >
-          <span>+</span> Add Category
-        </button>
-      </div>
+
+        {/* Search and Actions Row */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
+          {/* Search Bar - Wider, Left side */}
+          <div className="relative flex-1 lg:max-w-lg">
+            <input
+              type="text"
+              placeholder="Search categories by name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-5 py-4 pr-12 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <svg className="absolute right-4 top-4 w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+
+          {/* Add Category Button - Right side */}
+          <div className="flex items-center space-x-4">
+            <button 
+              onClick={() => setShowAddModal(true)}
+              className="px-8 py-4 text-lg bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              + Add Category
+            </button>
+          </div>
+        </div>
 
       {apiError && (
         <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-lg mb-6 flex justify-between items-center">
@@ -184,11 +257,11 @@ export default function CategoriesPage() {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
-          <p className="text-gray-500">Syncing destinations...</p>
+          <p className="text-gray-500">Loading categories...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((category) => (
+          {filteredCategories.map((category) => (
             <div key={category.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all group">
               <div className="flex justify-between items-start mb-4">
                 <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${category.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
@@ -213,6 +286,7 @@ export default function CategoriesPage() {
           ))}
         </div>
       )}
+      </main>
 
       {/* --- MODALS --- */}
 
