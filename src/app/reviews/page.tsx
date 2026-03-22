@@ -51,7 +51,7 @@ export default function ReviewsPage() {
 
   const updateReviewStatus = async (reviewId: string, isApproved: boolean) => {
     try {
-      await api.updateReviewStatus(reviewId, { isApproved });
+      await api.updateReviewStatus(reviewId, { isApproved, status: isApproved ? 'APPROVED' : 'PENDING' });
       await loadReviews(); // Refresh list
     } catch (error) {
       console.error('Failed to update review:', error);
@@ -63,17 +63,9 @@ export default function ReviewsPage() {
     if (!confirm('Are you sure you want to reject this review?')) return;
     
     try {
-      // Update the review locally to mark as rejected
-      setReviews(prevReviews => 
-        prevReviews.map(review => 
-          review.id === reviewId 
-            ? { ...review, status: 'REJECTED', isApproved: false }
-            : review
-        )
-      );
-      
-      // In the future, this would call an API to update the status
-      // await api.updateReviewStatus(reviewId, { status: 'REJECTED' });
+      // Call backend API to update status
+      await api.updateReviewStatus(reviewId, { isApproved: false, status: 'REJECTED' });
+      await loadReviews(); // Refresh list
       
       console.log('Review rejected:', reviewId);
     } catch (error) {
@@ -430,13 +422,7 @@ export default function ReviewsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex text-yellow-400">
-                          {[...Array(5)].map((_, i) => (
-                            <span key={i} className={i < review.rating ? 'text-yellow-400' : 'text-gray-300'}>
-                              ★
-                            </span>
-                          ))}
-                        </div>
+                        <span className="text-sm font-medium text-gray-900">Rating: {review.rating}</span>
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900 max-w-xs truncate">{review.review}</div>

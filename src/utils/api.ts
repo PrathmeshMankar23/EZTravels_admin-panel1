@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://easy-travels-backend.onrender.com/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://easy-travels-backend.onrender.com/api';
 
 // Debug: Log the API URL being used
 console.log('API Base URL:', API_BASE_URL);
@@ -381,7 +381,7 @@ export const api = {
     }
   },
 
-  updateReviewStatus: async (id: string, statusData: { isApproved: boolean }) => {
+  updateReviewStatus: async (id: string, statusData: { isApproved: boolean; status?: string }) => {
     const token = localStorage.getItem("adminToken");
     const response = await fetch(`${API_BASE_URL}/reviews/${id}`, {
       method: "PUT",
