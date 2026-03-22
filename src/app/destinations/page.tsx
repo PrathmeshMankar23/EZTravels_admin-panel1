@@ -499,7 +499,10 @@ export default function DestinationsPage() {
   const addActivity = (dayIndex: number) => {
     setFormData(prev => {
       const days = [...prev.days];
-      days[dayIndex].activities.push('');
+      days[dayIndex] = {
+        ...days[dayIndex],
+        activities: [...days[dayIndex].activities, '']
+      };
       return { ...prev, days };
     });
   };
@@ -511,7 +514,12 @@ export default function DestinationsPage() {
   ) => {
     setFormData(prev => {
       const days = [...prev.days];
-      days[dayIndex].activities[actIndex] = value;
+      const newActivities = [...days[dayIndex].activities];
+      newActivities[actIndex] = value;
+      days[dayIndex] = {
+        ...days[dayIndex],
+        activities: newActivities
+      };
       return { ...prev, days };
     });
   };
@@ -519,8 +527,10 @@ export default function DestinationsPage() {
   const removeActivity = (dayIndex: number, actIndex: number) => {
     setFormData(prev => {
       const days = [...prev.days];
-      days[dayIndex].activities =
-        days[dayIndex].activities.filter((_, i) => i !== actIndex);
+      days[dayIndex] = {
+        ...days[dayIndex],
+        activities: days[dayIndex].activities.filter((_, i) => i !== actIndex)
+      };
       return { ...prev, days };
     });
   };

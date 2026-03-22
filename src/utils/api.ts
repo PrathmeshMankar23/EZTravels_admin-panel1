@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://easy-travels-backend.onrender.com/api';
+const API_BASE_URL = 'https://easy-travels-backend.onrender.com/api';
 
 // Debug: Log the API URL being used
 console.log('API Base URL:', API_BASE_URL);
@@ -58,16 +58,26 @@ export const api = {
   },
 
   uploadImage: async (file: File) => {
-    const formData = new FormData();
-    formData.append("image", file);
+    const base64Image = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
 
-    const res = await fetch("/api/upload", {
+    const token = localStorage.getItem("adminToken");
+    const res = await fetch(`${API_BASE_URL}/itinerary/upload-image`, {
       method: "POST",
-      body: formData,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ image: base64Image }),
     });
 
     if (!res.ok) {
-      throw new Error("Image upload failed");
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || err.message || "Image upload failed");
     }
 
     return res.json();
@@ -450,3 +460,4 @@ export const deleteReview = async (id: string) => {
     throw new Error("Failed to delete review");
   }
 };
+
