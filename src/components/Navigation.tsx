@@ -99,18 +99,10 @@ export default function Navigation() {
           <div className="flex justify-between h-16">
 
             <div className="flex items-center">
+              <span className="text-xl font-bold text-blue-600">
+                Welcome Admin
+              </span>
 
-              <button
-
-                onClick={() => router.push('/')}
-
-                className="text-xl font-bold text-blue-600 hover:text-blue-800"
-
-              >
-
-                Easy Travels Admin
-
-              </button>
 
               <div className="hidden md:flex ml-10 space-x-8">
 
@@ -146,10 +138,8 @@ export default function Navigation() {
 
             <div className="flex items-center space-x-4">
 
-              <span className="hidden sm:block text-sm text-secondary">
-
-                Welcome, {user?.name}
-
+              <span className="hidden sm:block text-sm text-secondary font-medium">
+                Welcome, {user?.username} <span className="text-xs text-gray-400">({user?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Admin'})</span>
               </span>
 
               <button
@@ -226,10 +216,9 @@ export default function Navigation() {
 
           <div className="px-2 pt-2 pb-3 space-y-1">
 
-            <div className="flex items-center justify-between px-3 py-2">
-
-              <span className="text-sm text-secondary">Welcome, {user?.name}</span>
-
+            <div className="flex flex-col px-3 py-2">
+              <span className="text-sm font-semibold text-primary">Welcome, {user?.username}</span>
+              <span className="text-xs text-secondary">{user?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Admin'}</span>
             </div>
 
             {navItems.map((item) => (

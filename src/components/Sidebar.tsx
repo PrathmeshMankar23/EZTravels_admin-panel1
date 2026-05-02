@@ -1,20 +1,36 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   MapPin,
   Grid3x3,
   Menu,
   X,
-  Star
+  Star,
+  Users
 } from 'lucide-react';
 
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [adminUser, setAdminUser] = useState<any>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const userData = localStorage.getItem('adminUser');
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        setAdminUser(parsedUser);
+        setUserRole(parsedUser.role);
+      } catch (e) {
+        console.error("Error parsing user data:", e);
+      }
+    }
+  }, []);
 
   const navItems = [
     {
@@ -38,6 +54,15 @@ export default function Sidebar() {
       icon: Star
     }
   ];
+
+  // Add Admin Management only for SUPER_ADMIN
+  if (userRole === 'SUPER_ADMIN') {
+    navItems.push({
+      path: '/admin-management',
+      label: 'Admin Management',
+      icon: Users
+    });
+  }
 
   const handleNavClick = (path: string) => {
     router.push(path);
@@ -109,10 +134,10 @@ export default function Sidebar() {
             <div className="flex-1 min-w-0">
               <div className="flex flex-col">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  Admin User
+                  {adminUser?.username || 'Admin User'}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
-                  admin@easytravels.com
+                  {adminUser?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Admin'}
                 </p>
               </div>
             </div>

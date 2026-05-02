@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://easy-travels-backend.onrender.com/api';
+const API_BASE_URL = 'https://easy-travels-backend.onrender.com/api';
 
 // Debug: Log the API URL being used
 console.log('API Base URL:', API_BASE_URL);
@@ -17,7 +17,87 @@ export const testConnectivity = async () => {
 };
 
 export const api = {
-  // Auth endpoints
+  // Forgot Password
+  forgotPassword: async (email: string) => {
+    const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || err.message || 'Failed to send reset instructions');
+    }
+    return response.json();
+  },
+
+  // Reset Password
+  resetPassword: async (email: string, otp: string, newPassword: string) => {
+    const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, otp, newPassword }),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || err.message || 'Failed to reset password');
+    }
+    return response.json();
+  },
+  // Get Admins
+  getAdmins: async () => {
+    const token = localStorage.getItem("adminToken");
+    const response = await fetch(`${API_BASE_URL}/admin`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || err.message || "Failed to fetch admins");
+    }
+    return response.json();
+  },
+
+  // Create Admin
+  createAdmin: async (adminData: { username: string; email: string; password: string; role: string }) => {
+    const token = localStorage.getItem("adminToken");
+    const response = await fetch(`${API_BASE_URL}/admin/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(adminData),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || err.message || "Failed to create admin");
+    }
+    return response.json();
+  },
+
+  // Delete Admin
+  deleteAdmin: async (adminId: string) => {
+    const token = localStorage.getItem("adminToken");
+    const response = await fetch(`${API_BASE_URL}/admin/${adminId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || err.message || "Failed to delete admin");
+    }
+    return response.json();
+  },
+
   login: async (email: string, password: string) => {
     const response = await fetch(`${API_BASE_URL}/admin/login`, {
       method: 'POST',

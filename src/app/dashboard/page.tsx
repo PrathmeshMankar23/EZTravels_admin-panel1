@@ -78,7 +78,7 @@ export default function DashboardPage() {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [editingDestination, setEditingDestination] = useState<any>(null);
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
-  
+
   // Destination form state - exact same as destinations page
   const initialFormState = {
     id: '',
@@ -102,18 +102,18 @@ export default function DashboardPage() {
       }
     ]
   };
-  
+
   const [destinationForm, setDestinationForm] = useState(initialFormState);
   const [categoryForm, setCategoryForm] = useState({ name: '', isActive: true });
   const [categories, setCategories] = useState<any[]>([]);
-  
+
   // Helper functions from destinations page
   const safeNum = (n: unknown): string => {
     const num = Number(n);
     if (n === undefined || n === null || Number.isNaN(num)) return '';
     return String(num);
   };
-  
+
   const addArrayItem = (field: 'highlights' | 'included' | 'notIncluded') => {
     setDestinationForm(prev => ({
       ...prev,
@@ -259,7 +259,7 @@ export default function DashboardPage() {
     try {
       const payload = buildBackendPayload();
       console.log('Destination payload:', payload);
-      
+
       // Add activity to localStorage
       const newActivity = {
         id: Date.now().toString(),
@@ -269,11 +269,11 @@ export default function DashboardPage() {
         timestamp: new Date().toISOString(),
         user: 'Admin'
       };
-      
+
       const existingActivities = JSON.parse(localStorage.getItem('recentActivities') || '[]');
       const updatedActivities = [newActivity, ...existingActivities].slice(0, 10);
       localStorage.setItem('recentActivities', JSON.stringify(updatedActivities));
-      
+
       setDestinationForm(initialFormState);
       setShowDestinationModal(false);
       setEditingDestination(null);
@@ -290,7 +290,7 @@ export default function DashboardPage() {
       setShowCategoryModal(false);
       setCategoryForm({ name: '', isActive: true });
       alert('Category created successfully!');
-      
+
       // Refresh categories in localStorage so categories page shows the new category
       const cachedCategories = JSON.parse(localStorage.getItem('cachedCategories') || '[]');
       const newCategory = {
@@ -301,7 +301,7 @@ export default function DashboardPage() {
       };
       const updatedCategories = [...cachedCategories, newCategory];
       localStorage.setItem('cachedCategories', JSON.stringify(updatedCategories));
-      
+
     } catch (err: any) {
       alert(err.message || 'Failed to create');
     }
@@ -376,23 +376,23 @@ export default function DashboardPage() {
   const generateReport = async () => {
     try {
       setIsGeneratingReport(true);
-      
+
       // Get all reviews from API
       const allReviews = await api.getReviews();
-      
+
       // Filter reviews by date range
       const fromDate = new Date(reportDateRange.from);
       const toDate = new Date(reportDateRange.to);
       toDate.setHours(23, 59, 59, 999); // End of day
-      
+
       const filteredReviews = allReviews.filter((review: Review) => {
         const reviewDate = new Date(review.createdAt);
         return reviewDate >= fromDate && reviewDate <= toDate;
       });
-      
+
       setReportData(filteredReviews);
       setShowReportModal(true);
-      
+
     } catch (error) {
       console.error('Failed to generate report:', error);
       alert('Failed to generate report. Please try again.');
@@ -440,9 +440,8 @@ export default function DashboardPage() {
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="mt-2 text-gray-600">Welcome to your Easy Travels Admin Panel</p>
           </div>
-          
+
           {/* Quick Action Buttons */}
           <div className="flex flex-wrap gap-3">
             <button
@@ -552,7 +551,7 @@ export default function DashboardPage() {
         {/* Review Analytics & Reports - Left Side */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">📊 Review Analytics & Reports</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Calendar Widget */}
             <div>
@@ -571,7 +570,7 @@ export default function DashboardPage() {
                     </svg>
                   </button>
                 </div>
-                
+
                 {/* Calendar Grid */}
                 <div className="grid grid-cols-7 gap-1 text-xs">
                   {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
@@ -583,15 +582,14 @@ export default function DashboardPage() {
                     const reviewCount = Math.floor(Math.random() * 5); // Demo data
                     const hasReviews = reviewCount > 0;
                     const isToday = dayNum === 19;
-                    
+
                     return (
                       <div
                         key={i}
-                        className={`text-center py-1 rounded cursor-pointer transition-colors ${
-                          isToday ? 'bg-blue-500 text-white' : 
-                          hasReviews ? 'bg-green-100 hover:bg-green-200' : 
-                          'hover:bg-gray-100'
-                        }`}
+                        className={`text-center py-1 rounded cursor-pointer transition-colors ${isToday ? 'bg-blue-500 text-white' :
+                            hasReviews ? 'bg-green-100 hover:bg-green-200' :
+                              'hover:bg-gray-100'
+                          }`}
                         title={`${reviewCount} reviews on March ${dayNum}`}
                       >
                         {dayNum}
@@ -613,7 +611,7 @@ export default function DashboardPage() {
                     type="date"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={reportDateRange.from}
-                    onChange={(e) => setReportDateRange({...reportDateRange, from: e.target.value})}
+                    onChange={(e) => setReportDateRange({ ...reportDateRange, from: e.target.value })}
                   />
                 </div>
                 <div>
@@ -622,10 +620,10 @@ export default function DashboardPage() {
                     type="date"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={reportDateRange.to}
-                    onChange={(e) => setReportDateRange({...reportDateRange, to: e.target.value})}
+                    onChange={(e) => setReportDateRange({ ...reportDateRange, to: e.target.value })}
                   />
                 </div>
-                <button 
+                <button
                   onClick={generateReport}
                   disabled={isGeneratingReport}
                   className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
@@ -661,11 +659,10 @@ export default function DashboardPage() {
                 <div key={review.id} className="border-l-4 border-purple-200 pl-4 py-2">
                   <div className="flex justify-between items-start mb-1">
                     <h3 className="font-medium text-gray-900">{review.name}</h3>
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      review.isApproved 
-                        ? 'bg-green-100 text-green-800' 
+                    <span className={`px-2 py-1 text-xs rounded-full ${review.isApproved
+                        ? 'bg-green-100 text-green-800'
                         : 'bg-yellow-100 text-yellow-800'
-                    }`}>
+                      }`}>
                       {review.isApproved ? 'Approved' : 'Pending'}
                     </span>
                   </div>
@@ -719,14 +716,14 @@ export default function DashboardPage() {
                 </button>
               </div>
             </div>
-            
+
             <div className="p-6 overflow-y-auto max-h-[60vh]">
               <div className="mb-4">
                 <p className="text-sm text-gray-600">
                   Found <span className="font-semibold">{reportData.length}</span> reviews in selected date range
                 </p>
               </div>
-              
+
               {reportData.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -743,15 +740,14 @@ export default function DashboardPage() {
                           <h3 className="font-medium text-gray-900">{review.name}</h3>
                           {review.email && <p className="text-sm text-gray-500">{review.email}</p>}
                         </div>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          review.isApproved 
-                            ? 'bg-green-100 text-green-800' 
+                        <span className={`px-2 py-1 text-xs rounded-full ${review.isApproved
+                            ? 'bg-green-100 text-green-800'
                             : 'bg-yellow-100 text-yellow-800'
-                        }`}>
+                          }`}>
                           {review.isApproved ? 'Approved' : 'Pending'}
                         </span>
                       </div>
-                      
+
                       <div className="flex items-center mb-2">
                         <div className="flex text-yellow-400 text-sm">
                           {[...Array(5)].map((_, i) => (
@@ -762,9 +758,9 @@ export default function DashboardPage() {
                         </div>
                         <span className="ml-2 text-xs text-gray-500">({review.rating}/5)</span>
                       </div>
-                      
+
                       <p className="text-sm text-gray-700 mb-2">{review.review}</p>
-                      
+
                       <p className="text-xs text-gray-500">
                         {new Date(review.createdAt).toLocaleDateString('en-US', {
                           year: 'numeric',
@@ -777,7 +773,7 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
-            
+
             <div className="p-6 border-t border-gray-200">
               <div className="flex justify-end">
                 <button
@@ -974,11 +970,11 @@ export default function DashboardPage() {
                 />
               </div>
               <label className="flex items-center gap-3 cursor-pointer p-2">
-                <input 
-                  type="checkbox" 
-                  className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-                  checked={categoryForm.isActive} 
-                  onChange={(e) => setCategoryForm({ ...categoryForm, isActive: e.target.checked })} 
+                <input
+                  type="checkbox"
+                  className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  checked={categoryForm.isActive}
+                  onChange={(e) => setCategoryForm({ ...categoryForm, isActive: e.target.checked })}
                 />
                 <span className="text-gray-700 font-medium">Visible on website</span>
               </label>

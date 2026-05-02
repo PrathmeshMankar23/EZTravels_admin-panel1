@@ -44,7 +44,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar />
-      
+
       {/* Main Content */}
       <div className="flex-1 lg:ml-64">
         {/* Top Header */}
@@ -52,13 +52,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex-1">
-                {/* Page Title Removed */}
+                <h2 className="text-xl font-bold text-gray-800">Welcome Admin</h2>
               </div>
-              
+
               {/* User Actions */}
               <div className="flex items-center space-x-3">
                 <span className="hidden sm:block text-sm text-gray-600">
-                  {user?.name || 'Admin'}
+                  {user?.name || ''}
                 </span>
                 <button
                   onClick={() => router.push('/profile')}
@@ -75,7 +75,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <span className="hidden sm:inline">Logout</span>
                 </button>
               </div>
-              
+
               {/* Mobile spacer for menu button */}
               <div className="lg:hidden w-10"></div>
             </div>
